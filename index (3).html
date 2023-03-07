@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Search</title>
+    <script src="https://kit.fontawesome.com/2b061f088d.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous"> 
+</head>
+<body class="bg-dark" style="background-attachment:fixed; background-size: cover; background-repeat: no-repeat; background-image: url(./TheEagleBehindtheFlowers.jpg);">
+    <div class="col-12 d-flex vh-100 justify-content-center align-items-center">
+        <div class="card" id="divFind">
+            <div class="card-head mt-2 ms-3 me-3 border-bottom">
+                <h2>Find Room Information</h2>
+            </div>
+            <div class="card-body">
+                <form>
+                    <input class="form-control border-dark mb-2" id="txtBuilding" placeholder="Building" aria-label="Enter Building">
+                    <input class="form-control border-dark mb-2" id="txtRoom" placeholder="Room" aria-label="Enter Room Number">
+                    <button class="btn btn-primary mt-2 col-8 offset-2" id="btnFind" type="button">Find</button>
+                </form>
+            </div>
+        </div>
+        <div>
+            <div id="divCards" class="vh-100"></div>
+        </div>
+        
+
+        </div>
+    </div>
+</body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script> 
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+    
+    
+    <script>
+        const strAPIKey='D02DAD5F-02E3-44E7-9793-1D43FE96D804';
+        $('#btnFind').on('click',function(){
+            let blnError = false;
+            let strErrorMessage='';
+            let strBuilding = $('#txtBuilding').val();
+            if (strBuilding.length <1 ){
+                blnError=true;
+                strErrorMessage+="Building cannot be blank.";
+            }
+
+            let strRoom = $('#txtRoom').val();
+            if (strRoom.length <1 ){
+                blnError=true;
+                strErrorMessage+="Room cannot be blank.";
+            }
+
+            if(blnError==true){
+                alert(strErrorMessage);
+            } else{
+                $('#divFind').slideUp();
+                $.getJSON('https://portapi.tntech.edu/express/api/unprotected/getVLICSInfoByAPIKey.php',{APIKey:strAPIKey,Building:strBuilding,Room:strRoom}, function(result){
+                    console.log(result);
+                    $.each(result,function(index,entry){
+                        let strHTML='<div class="card">';
+                            strHTML += '<div class="card-header col-12 d-flex justify-content-between">';
+                                strHTML += '<h2>' + entry.Building + ' ' + entry.Room + '</h2>';
+                                strHTML += '<button class="btn btn-danger rounded-0" id="btnReset">Reset</button>'
+                            strHTML += '</div>';
+                            strHTML += '<div class="card-body">';
+                                    $.each(entry.Classes,function(indexClass,curClass){
+                                        strHTML+='<h2>'+ curClass.Title + '</h2>';
+                                        strHTML+='<p><i class="fa-solid fa-graduation-cap"></i>'+ ' ' + curClass.Subject + curClass.Course + '(' + curClass.CRN + ')' + '</p>';
+                                        strHTML+='<p class="text-danger font-weight-bold"><i class="fa-regular fa-calendar-days text-black font-weight-normal"></i>'+ ' ' + curClass.Days + '</p>';
+                                        strHTML+='<p><i class="fa-solid fa-clock"></i>'+ ' ' + curClass.StartTime + ' - ' + curClass.EndTime + '</p>';
+                                        strHTML+='<p><i class="fa-solid fa-user"></i>'+ ' ' + curClass.PrimaryInstructor + '</p>';
+                                        strHTML+='<hr>'
+                                    })
+                                    $.each(entry.Occupants,function(indexOccupants,Occupants){
+                                        let Phone=Occupants.Phone
+                                        let Email=Occupants.Email
+                                        strHTML+='<h2><i class="fa-solid fa-user"></i>'+ ' ' + Occupants.FirstName + ' ' + Occupants.MiddleName + ' ' + Occupants.LastName + '</h2>'
+                                        strHTML+='<h4>' + Occupants.Title + ' | ' + Occupants.Dept + '</h4>'
+                                        strHTML+='<hr>'
+                                        strHTML+='<p><i class="fa-solid fa-phone"></i>'+ ' ' + '<a href=tel:' + Phone + '>' + Occupants.Phone + '</a></p>'
+                                        strHTML+='<p><i class="fa-solid fa-envelope"></i>'+ ' ' + '<a href=email:' + Email + '>' + Occupants.Email + '</a></p>'
+                                        strHTML+='<p><i class="fa-solid fa-inbox"></i>' + ' Campus Box: ' + Occupants.POBox + '</p>'
+                                        strHTML+='<p class="mb-3"><i class="fa-solid fa-location-dot"></i>' + ' ' + Occupants.LocationCombined + '</p>'
+                                    
+                                    
+                                    
+                                    })  
+
+                            strHTML += '</div>'
+                        strHTML+='</div>';
+                        
+                        $('#divCards').append(strHTML);
+                        $('#divCards').slideDown();
+                        $('#btnReset').on('click',function(){
+                            $('#divCards').slideUp();
+                            $('#divCards').empty();
+                            $('#divFind').slideDown();
+                        })
+                        //https://express.tntech.edu/roomview/index.html
+                    })
+                })
+            }
+        })
+    </script>
+</html>
