@@ -203,14 +203,17 @@
 
         $('#btnLogout').on('click',function(){
             // Use this click handler to log a user out from the application
-            let strSessionID = sessionStorage.getItem('APISessionStorage'); // set the value of this variable to the value of your SimpleSession that you have stored
+            let strSession = sessionStorage.getItem('SimpleFarmSession'); // set the value of this variable to the value of your SimpleSession that you have stored
             $.ajax({
-                type: "ENTER_YOUR_APPROPRIATE_HTTP_METHOD_HERE",
+                type: "delete",
                 contentType:"applicaiton/json; charset=utf-8",
                 url: "https://simplefarm.thesimplehomestead.com/api/sessions.php",
                 data: { SessionID:strSession },
                 success:function(result){
                     // Complete your logout
+                    alert("AAAAAAH")
+                    $('#divAnimalDashboard').slideToggle();
+                    $('#divLogin').slideToggle();
                 },
                 error: function(resultError){
                     // Handle any errors here
